@@ -3,8 +3,12 @@
 #include "login.h"
 
 int main(){
-    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8); //Coloca ç e acentos pra ficar bonito
     int decisao = 0; 
+//--------------------------------------------------------------------------
+//                         Menuzão brabo
+//--------------------------------------------------------------------------
+
     
     do {
         printf("==========================================================================\n");
@@ -25,10 +29,10 @@ int main(){
         
         if (decisao > 8 || decisao < 1){
             printf("\nCodigo invalido, tente outro número.\n\n");
-            Sleep(2500);
+            Sleep(2500); //Coloquei esse comando pra dar um tempo pro mano ler q o código é inválido e q ele não sabe digitar
         }
 
     } while (decisao > 8 || decisao < 1);
     
-    login(decisao);
+    login(decisao);  // ativa a função login de acordo com o número digitado
 }
