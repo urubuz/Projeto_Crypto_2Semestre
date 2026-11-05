@@ -3,6 +3,8 @@
 #include <ctype.h>
 #include <windows.h>
 
+float z1 = 0.0, z2 = 0.0, z3 = 0.0, z4 = 0.0;
+
 struct Moeda {
     char nome[20];
     float valor;
@@ -17,11 +19,24 @@ struct Moeda moedas[3] = {
     {"Ripple", 250, 0.01, 0.01, 0.0}
 };
 
+struct User {
+    char nome[100];
+    char cpf[15];
+    char senha[20];
+    float saldo;
+    float btc;
+    float eth;
+    float rip;
+};
+
+struct User usuariologado;
+
 void salvarMoedas(struct Moeda moedas[]) {
     FILE *arquivo = fopen("moedas.txt", "w");
 
     if (arquivo == NULL) {
         printf("Erro ao salvar as moedas.\n");
+        Sleep(1500);
         return;
     }
 
@@ -59,7 +74,6 @@ int cadastrar() {
     char cpfFormatado[15];
     char senha[20];
     char linha[200];
-    float z1 = 0.0, z2 = 0.0, z3 = 0.0, z4 = 0.0;
 
     printf("\n========== CADASTRO ==========\n");
 
@@ -71,6 +85,7 @@ int cadastrar() {
 
     if (strlen(cpf) != 11 || !validarNumeros(cpf)) {
         printf("\nCPF invalido. Ele deve conter exatamente 11 numeros.\n");
+        Sleep(1500);
         return 0;
     }
 
@@ -81,6 +96,7 @@ int cadastrar() {
 
     if (strlen(senha) != 6 || !validarNumeros(senha)) {
         printf("\nSenha invalida. Ela deve conter exatamente 6 numeros.\n");
+        Sleep(1500);
         return 0;
     }
 
@@ -88,6 +104,7 @@ int cadastrar() {
 
     if (arquivo == NULL) {
         printf("\nErro ao abrir o arquivo de usuarios.\n");
+        Sleep(1500);
         return 0;
     }
 
@@ -103,6 +120,7 @@ int cadastrar() {
 
             if (strcmp(cpfFormatado, cpfSalvo) == 0) {
                 printf("\nJa existe uma conta cadastrada com esse CPF.\n");
+                Sleep(1500);
                 fclose(arquivo);
                 return 0;
             }
@@ -114,6 +132,7 @@ int cadastrar() {
     fclose(arquivo);
 
     printf("\nCadastro realizado com sucesso!\n");
+    Sleep(1500);
 
     return 1;
 }
@@ -136,6 +155,7 @@ int login() {
 
     if (strlen(cpf) != 11 || !validarNumeros(cpf)) {
         printf("\nCPF invalido.\n");
+        Sleep(1500);
         return 0;
     }
 
@@ -146,6 +166,7 @@ int login() {
 
     if (strlen(senha) != 6 || !validarNumeros(senha)) {
         printf("\nSenha invalida.\n");
+        Sleep(1500);
         return 0;
     }
 
@@ -153,15 +174,24 @@ int login() {
 
     if (arquivo == NULL) {
         printf("\nNenhum usuario cadastrado.\n");
+        Sleep(1500);
         return 0;
     }
 
     while (fgets(linha, sizeof(linha), arquivo) != NULL) {
-        if (sscanf(linha, "%99[^;];%14[^;];%19[^;];0;0;0;0",nomeSalvo, cpfSalvo, senhaSalva) == 3) {
+        if (sscanf(linha, "%99[^;];%14[^;];%19[^;];%f;%f;%f;%f",nomeSalvo, cpfSalvo, senhaSalva, &z1, &z2, &z3, &z4) == 7) {
 
             if (strcmp(cpfFormatado, cpfSalvo) == 0 && strcmp(senha, senhaSalva) == 0) {
 
                 printf("\nLogin realizado com sucesso! Bem-vindo, %s.\n", nomeSalvo);
+                strcpy(usuariologado.nome, nomeSalvo);
+                strcpy(usuariologado.cpf, cpfSalvo);
+                strcpy(usuariologado.senha, senhaSalva);
+                usuariologado.saldo = z1;
+                usuariologado.btc = z2;
+                usuariologado.eth = z3;
+                usuariologado.rip = z4;
+                Sleep(1500);
 
                 fclose(arquivo);
                 return 1;
@@ -172,6 +202,7 @@ int login() {
     fclose(arquivo);
 
     printf("\nCPF ou senha incorretos.\n");
+    Sleep(1500);
 
     return 0;
 }
@@ -213,6 +244,55 @@ void carregarMoedas(struct Moeda moedas[]) {
     }
 }
 
+void atualizarUsuario(struct User usuario) {
+    FILE *arquivo = fopen("usuarios.txt", "r");
+    FILE *temporario = fopen("usuarios_temp.txt", "w");
+
+    if (arquivo == NULL || temporario == NULL) {
+        printf("Erro ao atualizar usuario.\n");
+
+        if (arquivo != NULL) fclose(arquivo);
+        if (temporario != NULL) fclose(temporario);
+
+        return;
+    }
+
+    char linha[300];
+    char nome[100], cpf[15], senha[20];
+    float saldo, btc, eth, rip;
+
+    while (fgets(linha, sizeof(linha), arquivo) != NULL) {
+
+        if (sscanf(linha, "%99[^;];%14[^;];%19[^;];%f;%f;%f;%f",
+                   nome, cpf, senha, &saldo, &btc, &eth, &rip) == 7) {
+
+            if (strcmp(cpf, usuario.cpf) == 0) {
+
+                fprintf(temporario, "%s;%s;%s;%.2f;%.2f;%.2f;%.2f\n",
+                        usuario.nome,
+                        usuario.cpf,
+                        usuario.senha,
+                        usuario.saldo,
+                        usuario.btc,
+                        usuario.eth,
+                        usuario.rip);
+
+            } else {
+                fputs(linha, temporario);
+            }
+
+        } else {
+            fputs(linha, temporario);
+        }
+    }
+
+    fclose(arquivo);
+    fclose(temporario);
+
+    remove("usuarios.txt");
+    rename("usuarios_temp.txt", "usuarios.txt");
+}
+
 void consultar(struct Moeda moedas[]){
     for (int i=0;i<3;i++){
         printf("%s, com valor de: %.2f (Variação de: %.2f)\n", moedas[i].nome, moedas[i].valor, moedas[i].variacao);
@@ -235,11 +315,57 @@ void atualizar(){
     printf("Valores atualizados.");
 }
 
-void saldo(){
-    FILE *arquivo = fopen("usuarios.txt", "r");
+void consultarSaldo(){
+    printf("\n========== SALDO ==========\n");
+    printf("\nNome: %s\n", usuariologado.nome);
+    printf("CPF: %s\n", usuariologado.cpf);
+    printf("\nReais: R$ %.2f\n", usuariologado.saldo);
+    printf("Bitcoin: %.6f BTC\n", usuariologado.btc);
+    printf("Ethereum: %.6f ETH\n", usuariologado.eth);
+    printf("Ripple: %.6f XRP\n", usuariologado.rip);
+    Sleep(1500);
+}
 
-    if (arquivo == NULL) {
+void depositar(){
+    float deposito;
+
+    printf("Quanto você deseja depositar em R$?\n");
+    scanf("%f", &deposito);
+
+    if (deposito <= 0) {
+        printf("Valor de deposito invalido.\n");
+        Sleep(1500);
         return;
     }
 
+    usuariologado.saldo += deposito;
+
+    atualizarUsuario(usuariologado);
+
+    printf("%.2f R$ depositados com sucesso!", deposito);
+    Sleep(1500);
+}
+
+void sacar(){
+    float saque;
+
+    printf("Quanto você deseja sacar em R$?\n");
+    scanf("%f", &saque);
+
+    if (saque <= 0 || saque > usuariologado.saldo){
+        printf("Valor de saque invalido.\n");
+        Sleep(1500);
+        return;
+    }
+
+    usuariologado.saldo -= saque;
+
+    atualizarUsuario(usuariologado);
+
+    printf("%.2f R$ sacados com sucesso!", saque);
+    Sleep(1500);
+}
+
+void comprarbtc(){
+    
 }
