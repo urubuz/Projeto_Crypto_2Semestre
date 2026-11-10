@@ -1,8 +1,0 @@
-========================================
-EXTRATO - Sergio Autopecas
-Nome: Pinto da Silva
-CPF: 111.111.111-11
-========================================
-[09/11/2026 16:35:17] Extrato iniciado | Saldo atual: R$ 23956.67 | 0.000000 BTC | 0.000000 ETH | 0.000000 XRP
-[09/11/2026 16:36:16] COMPRA BTC | - R$ 12000.00 | Cotacao: R$ 1161.66 | Recebido (liquido de taxa): 10.123431 BTC | Saldo: R$ 11956.67
-[09/11/2026 16:37:34] SAQUE | - R$ 956.67 | Saldo: R$ 11000.00
